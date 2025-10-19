@@ -1,4 +1,4 @@
-﻿// ===== WAKTU SOLAT MALAYSIA - ALL FEATURES IN ONE =====
+// ===== WAKTU SOLAT MALAYSIA - ALL FEATURES IN ONE =====
 // Complete implementation with all 5 unique features!
 
 const API_BASE = 'https://api.waktusolat.app';
@@ -371,7 +371,7 @@ class StreakTracker {
         const message = this.getMotivationalMessage();
         
         container.innerHTML = `
-            <div class="streak-header"><h3>📊 Pencapaian Hari Ini</h3></div>
+            <div class="streak-header"><h3>?? Pencapaian Hari Ini</h3></div>
             <div class="streak-progress">
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: ${progress.percentage}%"></div>
@@ -379,7 +379,7 @@ class StreakTracker {
                 <div class="progress-text">${progress.completed}/${progress.total} solat</div>
             </div>
             <div class="streak-counter ${this.streakData.current > 0 ? 'streak-fire' : ''}">
-                🔥 <strong>${this.streakData.current}</strong> hari berturut-turut
+                ?? <strong>${this.streakData.current}</strong> hari berturut-turut
             </div>
             <div class="streak-message">${message}</div>
             <div class="prayer-checklist">
@@ -388,7 +388,7 @@ class StreakTracker {
                     return `
                         <div class="checklist-item ${checked ? 'checked' : ''}">
                             <button class="check-btn" data-prayer="${prayer}" ${checked ? 'disabled' : ''}>
-                                ${checked ? '✓' : '○'}
+                                ${checked ? '?' : '?'}
                             </button>
                             <span>${prayer}</span>
                         </div>
@@ -416,12 +416,12 @@ class StreakTracker {
         const streak = this.streakData.current;
         const progress = this.getTodayProgress();
         
-        if (progress.completed === 5) return '🎉 Tahniah! Anda telah sempurna hari ini!';
-        if (streak >= 30) return `🔥 Hebat! ${streak} hari berturut-turut!`;
-        if (streak >= 7) return `✨ Bagus! ${streak} hari streak!`;
-        if (progress.completed >= 3) return '💪 Teruskan usaha anda!';
-        if (progress.completed >= 1) return '👍 Permulaan yang baik!';
-        return '🕌 Jom mulakan hari dengan solat!';
+        if (progress.completed === 5) return '?? Tahniah! Anda telah sempurna hari ini!';
+        if (streak >= 30) return `?? Hebat! ${streak} hari berturut-turut!`;
+        if (streak >= 7) return `? Bagus! ${streak} hari streak!`;
+        if (progress.completed >= 3) return '?? Teruskan usaha anda!';
+        if (progress.completed >= 1) return '?? Permulaan yang baik!';
+        return '?? Jom mulakan hari dengan solat!';
     }
 }
 
@@ -462,7 +462,7 @@ class PrayerNotifications {
         if (!('Notification' in window)) return;
         
         if (Notification.permission === 'granted') {
-            const notification = new Notification(title, { body, icon: '🕌', badge: '🕌' });
+            const notification = new Notification(title, { body, icon: '??', badge: '??' });
             notification.onclick = () => { window.focus(); notification.close(); };
             setTimeout(() => notification.close(), 10000);
         }
@@ -494,13 +494,13 @@ class PrayerNotifications {
                 
                 if (notificationTime > now) {
                     const timeoutId = setTimeout(() => {
-                        this.showNotification(`⏰ Solat ${prayer.name}`, `Dalam ${this.settings.reminderMinutes} minit lagi (${prayer.time})`, true);
+                        this.showNotification(`? Solat ${prayer.name}`, `Dalam ${this.settings.reminderMinutes} minit lagi (${prayer.time})`, true);
                     }, notificationTime - now);
                     this.scheduledNotifications.push(timeoutId);
                 }
                 
                 const exactTimeoutId = setTimeout(() => {
-                    this.showNotification(`🕌 Masuk Waktu ${prayer.name}`, `Sekarang waktu solat ${prayer.name} (${prayer.time})`, true);
+                    this.showNotification(`?? Masuk Waktu ${prayer.name}`, `Sekarang waktu solat ${prayer.name} (${prayer.time})`, true);
                 }, prayerTime - now);
                 this.scheduledNotifications.push(exactTimeoutId);
             }
@@ -521,9 +521,9 @@ class PrayerNotifications {
         
         if (!hasNotificationAPI) {
             container.innerHTML = `
-                <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
+                <div class="settings-header"><h3>?? Tetapan Notifikasi</h3></div>
                 <div style="padding: 15px; background: rgba(255, 193, 7, 0.2); border-radius: 10px; margin: 10px 0;">
-                    <p style="margin: 0; color: #856404;">ℹ️ Notifikasi tidak disokong oleh pelayar ini. Cuba gunakan Chrome atau Safari terkini.</p>
+                    <p style="margin: 0; color: #856404;">?? Notifikasi tidak disokong oleh pelayar ini. Cuba gunakan Chrome atau Safari terkini.</p>
                 </div>
             `;
             return;
@@ -534,10 +534,10 @@ class PrayerNotifications {
         const permission = 'Notification' in window ? Notification.permission : 'default';
         
         container.innerHTML = `
-            <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
+            <div class="settings-header"><h3>?? Tetapan Notifikasi</h3></div>
             
             ${!isEnabled && canRequest ? `
-                <button class="enable-notifications-btn" id="enable-notifications">✅ Aktifkan Notifikasi</button>
+                <button class="enable-notifications-btn" id="enable-notifications">? Aktifkan Notifikasi</button>
                 <div style="padding: 10px; margin-top: 10px; font-size: 0.85rem; color: #999; text-align: center;">
                     Dapatkan peringatan sebelum waktu solat masuk
                 </div>
@@ -545,7 +545,7 @@ class PrayerNotifications {
             
             ${isEnabled ? `
                 <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; margin-bottom: 15px; color: #10b981; text-align: center;">
-                    ✓ Notifikasi diaktifkan
+                    ? Notifikasi diaktifkan
                 </div>
                 <div class="settings-group">
                     <label>Peringatan sebelum:</label>
@@ -561,10 +561,10 @@ class PrayerNotifications {
             
             ${permission === 'denied' ? `
                 <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px; color: #dc2626;">
-                    <p style="margin: 0;">⚠️ Notifikasi dihalang oleh pelayar.</p>
+                    <p style="margin: 0;">?? Notifikasi dihalang oleh pelayar.</p>
                     <p style="margin: 10px 0 0 0; font-size: 0.85rem;">Untuk mengaktifkan:</p>
                     <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.85rem;">
-                        <li>Buka Settings → Safari → Advanced</li>
+                        <li>Buka Settings ? Safari ? Advanced</li>
                         <li>Cari website ini dan benarkan notifikasi</li>
                         <li>Muat semula halaman</li>
                     </ol>
@@ -704,8 +704,8 @@ class ARQiblaFinder {
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         `;
         header.innerHTML = `
-            <h2 style="margin: 0; font-size: 1.2rem;">🕋 Arah Kiblat (Powered by Google)</h2>
-            <button onclick="qiblaFinder.close()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold;">✕ Tutup</button>
+            <h2 style="margin: 0; font-size: 1.2rem;">?? Arah Kiblat (Powered by Google)</h2>
+            <button onclick="qiblaFinder.close()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold;">? Tutup</button>
         `;
         
         // Iframe container
@@ -733,7 +733,7 @@ class ARQiblaFinder {
         document.body.appendChild(overlay);
         
         this.isActive = true;
-        console.log('🕋 Google Qibla Finder opened');
+        console.log('?? Google Qibla Finder opened');
     }
     
     close() {
@@ -745,7 +745,7 @@ class ARQiblaFinder {
             overlay.remove();
         }
         
-        console.log('🔴 Qibla finder closed');
+        console.log('?? Qibla finder closed');
     }
 }
 
@@ -779,277 +779,7 @@ function formatHijriDate(hijriStr) {
 
 // ===== MAIN APP INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
-            container.innerHTML = `
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; padding: 40px; background: #000;">
-                    <div style="background: rgba(107, 70, 193, 0.9); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px;">
-                        <div style="font-size: 5rem; margin-bottom: 20px;">🧭</div>
-                        <h3 style="font-size: 2rem; margin-bottom: 15px;">Arah Kiblat</h3>
-                        <div style="font-size: 3rem; font-weight: bold; color: #10b981; margin: 20px 0;">${Math.round(qiblaData.direction)}°</div>
-                        <div style="font-size: 1.2rem; margin-bottom: 10px;">Jarak ke Kaabah:</div>
-                        <div style="font-size: 1.5rem; font-weight: bold;">${Math.round(qiblaData.distance).toLocaleString()} km</div>
-                        <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 0.9rem;">
-                            ℹ️ Kamera tidak tersedia. Gunakan kompas dan hadapkan ke arah ${Math.round(qiblaData.direction)}° dari Utara.
-                        </div>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-        
-        // Show loading first
-        container.innerHTML = `
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; color: white;">
-                <div style="text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 20px;">📹</div>
-                    <div style="font-size: 1.5rem;">Membuka kamera...</div>
-                </div>
-            </div>
-        `;
-        
-        try {
-            // Request camera access first
-            console.log('🎥 Requesting camera access...');
-            this.videoStream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    facingMode: { ideal: 'environment' },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
-                audio: false
-            });
-            console.log('✅ Camera access granted!');
-            
-            // Now set up the AR view
-            container.innerHTML = `
-                <video id="qibla-camera" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;"></video>
-                <div id="qibla-compass-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
-                    <!-- Top info bar -->
-                    <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); padding: 10px 20px; border-radius: 20px; color: white; font-size: 0.9rem;">
-                        <div id="compass-status">📍 Kalibrasi kompas...</div>
-                    </div>
-                    
-                    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="position: absolute;">
-                        <!-- Compass circles -->
-                        <circle cx="${cx}" cy="${cy}" r="120" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-                        <circle cx="${cx}" cy="${cy}" r="100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
-                        
-                        <!-- Direction markers (N E S W) -->
-                        <text x="${cx}" y="${cy - 140}" text-anchor="middle" fill="white" font-size="24" font-weight="bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">N</text>
-                        <text x="${cx + 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">E</text>
-                        <text x="${cx}" y="${cy + 160}" text-anchor="middle" fill="white" font-size="20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">S</text>
-                        <text x="${cx - 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">W</text>
-                        
-                        <!-- Qibla arrow (will be rotated by JavaScript) -->
-                        <g id="qibla-arrow" style="transform-origin: ${cx}px ${cy}px; transition: transform 0.1s ease-out;">
-                            <!-- Arrow pointer -->
-                            <path d="M ${cx} ${cy - 90} L ${cx - 15} ${cy - 30} L ${cx} ${cy - 40} L ${cx + 15} ${cy - 30} Z" fill="#10b981" stroke="white" stroke-width="3" style="filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));"/>
-                            <!-- Center dot -->
-                            <circle cx="${cx}" cy="${cy}" r="12" fill="#10b981" stroke="white" stroke-width="3" style="filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));"/>
-                            <!-- Kaaba icon -->
-                            <text x="${cx}" y="${cy - 100}" text-anchor="middle" fill="white" font-size="28" font-weight="bold" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.9);">🕋</text>
-                        </g>
-                    </svg>
-                    
-                    <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(107, 70, 193, 0.95); padding: 20px 30px; border-radius: 15px; color: white; text-align: center; max-width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                        <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">Pusingkan Telefon ke Arah Kiblat</div>
-                        <div style="font-size: 1rem;">Bila anak panah hijau 🕋 menghala ke atas = Arah Kiblat ✓</div>
-                        <div id="qibla-angle-display" style="font-size: 0.85rem; margin-top: 10px; opacity: 0.8;">Arah Kiblat: ${Math.round(qiblaData.direction)}°</div>
-                    </div>
-                </div>
-            `;
-            
-            // Connect stream to video after DOM is ready
-            setTimeout(() => {
-                const video = document.getElementById('qibla-camera');
-                if (video && this.videoStream) {
-                    video.srcObject = this.videoStream;
-                    video.play().catch(e => console.error('Video play error:', e));
-                    console.log('✅ Camera stream connected!');
-                }
-            }, 100);
-            
-        } catch (error) {
-            console.error('❌ Camera error:', error);
-            container.innerHTML = `
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; padding: 40px; background: #000;">
-                    <div style="background: rgba(107, 70, 193, 0.9); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px;">
-                        <div style="font-size: 5rem; margin-bottom: 20px;">🧭</div>
-                        <h3 style="font-size: 2rem; margin-bottom: 15px;">Arah Kiblat</h3>
-                        <div style="font-size: 3rem; font-weight: bold; color: #10b981; margin: 20px 0;">${Math.round(qiblaData.direction)}°</div>
-                        <div style="font-size: 1.2rem; margin-bottom: 10px;">Jarak ke Kaabah:</div>
-                        <div style="font-size: 1.5rem; font-weight: bold;">${Math.round(qiblaData.distance).toLocaleString()} km</div>
-                        <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 0.9rem;">
-                            ⚠️ Tidak dapat mengakses kamera (${error.name}). Gunakan kompas dan hadapkan ke arah ${Math.round(qiblaData.direction)}° dari Utara.
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    setupMapView(container, qiblaData) {
-        container.innerHTML = `
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; padding: 40px;">
-                <div style="background: rgba(107, 70, 193, 0.9); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px;">
-                    <div style="font-size: 5rem; margin-bottom: 20px;">🧭</div>
-                    <h3 style="font-size: 2rem; margin-bottom: 15px;">Arah Kiblat</h3>
-                    <div style="font-size: 3rem; font-weight: bold; color: #10b981; margin: 20px 0;">${Math.round(qiblaData.direction)}°</div>
-                    <div style="font-size: 1.2rem; margin-bottom: 10px;">Jarak ke Kaabah:</div>
-                    <div style="font-size: 1.5rem; font-weight: bold;">${Math.round(qiblaData.distance).toLocaleString()} km</div>
-                    
-                    <div style="margin-top: 30px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 10px;">
-                        <p style="margin: 0; font-size: 0.95rem;">Gunakan kompas dan hadapkan ke arah ${Math.round(qiblaData.direction)}° dari Utara.</p>
-                        <p style="margin: 10px 0 0 0; font-size: 0.85rem; opacity: 0.8;">Lokasi anda: ${this.userLocation.lat.toFixed(4)}, ${this.userLocation.lng.toFixed(4)}</p>
-                    </div>
-                    
-                    <div style="margin-top: 30px; font-size: 0.9rem; opacity: 0.7;">
-                        💡 Tip: Gunakan aplikasi kompas pada telefon untuk ketepatan lebih baik
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    async startCompassTracking(container) {
-        console.log('🧭 Starting compass tracking...');
-        
-        // Request permission for iOS 13+
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            try {
-                const permission = await DeviceOrientationEvent.requestPermission();
-                if (permission !== 'granted') {
-                    console.warn('⚠️ Device orientation permission denied');
-                    return;
-                }
-                console.log('✅ Device orientation permission granted');
-            } catch (error) {
-                console.error('❌ Error requesting device orientation permission:', error);
-                return;
-            }
-        }
-        
-        // Use absolute device orientation for true compass heading
-        const eventType = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-        console.log('📱 Using event:', eventType);
-        
-        let compassHeading = 0;
-        let calibrationCount = 0;
-        
-        const handleOrientation = (event) => {
-            if (!this.isActive) return;
-            
-            // Get compass heading from device orientation
-            // alpha: rotation around z-axis (0-360)
-            // beta: front-to-back tilt (-180 to 180)
-            // gamma: left-to-right tilt (-90 to 90)
-            
-            let alpha = event.alpha; // Compass direction
-            const beta = event.beta;   // Front-back tilt
-            const gamma = event.gamma; // Left-right tilt
-            
-            if (alpha === null) return;
-            
-            // For iOS, need to adjust for screen orientation
-            if (event.webkitCompassHeading !== undefined) {
-                // iOS provides true compass heading directly
-                compassHeading = event.webkitCompassHeading;
-            } else {
-                // Android: use alpha value
-                // Adjust for screen orientation
-                const screenOrientation = window.orientation || 0;
-                compassHeading = alpha - screenOrientation;
-                
-                // Normalize to 0-360
-                if (compassHeading < 0) compassHeading += 360;
-                if (compassHeading >= 360) compassHeading -= 360;
-            }
-            
-            // Calculate how much to rotate the arrow
-            // When phone points North (compassHeading = 0), arrow should point to qiblaDirection
-            // When phone rotates, arrow rotates opposite direction to stay pointing at Qibla
-            const arrowRotation = this.qiblaDirection - compassHeading;
-            
-            const arrow = document.getElementById('qibla-arrow');
-            if (arrow) {
-                arrow.style.transform = `rotate(${arrowRotation}deg)`;
-            }
-            
-            // Update status indicator
-            calibrationCount++;
-            if (calibrationCount === 3) {
-                const statusEl = document.getElementById('compass-status');
-                if (statusEl) {
-                    statusEl.textContent = `🧭 Kompas aktif | ${Math.round(compassHeading)}°`;
-                }
-            }
-            
-            // Update angle display
-            const angleDisplay = document.getElementById('qibla-angle-display');
-            if (angleDisplay && calibrationCount > 3) {
-                const difference = Math.abs(compassHeading - this.qiblaDirection);
-                const isAligned = difference < 10 || difference > 350;
-                if (isAligned) {
-                    angleDisplay.innerHTML = `✅ <strong>ARAH KIBLAT!</strong> Sempurna!`;
-                    angleDisplay.style.color = '#10b981';
-                } else {
-                    angleDisplay.innerHTML = `Arah Kiblat: ${Math.round(this.qiblaDirection)}° | Anda: ${Math.round(compassHeading)}°`;
-                    angleDisplay.style.color = 'white';
-                }
-            }
-        };
-        
-        window.addEventListener(eventType, handleOrientation, true);
-        console.log('✅ Compass tracking started');
-        
-        // Store the event listener so we can remove it later
-        this.orientationHandler = handleOrientation;
-        this.orientationEventType = eventType;
-    }
-    
-    close() {
-        this.isActive = false;
-        
-        // Remove overlay (the iframe will be removed with it)
-        const overlay = document.getElementById('qibla-ar-overlay');
-        if (overlay) {
-            overlay.remove();
-        }
-        
-        console.log('🔴 Qibla finder closed');
-    }
-}
-
-function initQibla() {
-    qiblaFinder = new ARQiblaFinder();
-    
-    const compact = document.getElementById('qibla-compact');
-    if (compact) {
-        compact.addEventListener('click', () => {
-            qiblaFinder.open();
-        });
-    }
-}
-
-// ===== HELPER FUNCTIONS =====
-async function fetchPrayerTimes(zone) {
-    const response = await fetch(`https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone=${zone}`);
-    const data = await response.json();
-    return data.prayerTime ? data.prayerTime[0] : (data.data ? data.data[0] : data);
-}
-
-function formatHijriDate(hijriStr) {
-    if (!hijriStr) return '';
-    const parts = hijriStr.split('-');
-    if (parts.length === 3) {
-        const [year, month, day] = parts[0].length === 4 ? parts : [parts[2], parts[1], parts[0]];
-        return `${parseInt(day)} ${hijriMonths[month] || month} ${year}`;
-    }
-    return hijriStr;
-}
-
-// ===== MAIN APP INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 App initializing...');
+    console.log('?? App initializing...');
     
     try {
         // Initialize all features with error handling
@@ -1058,26 +788,26 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (canvas && center) {
             prayerClock = new PrayerClock('clock-canvas', 'clock-center');
-            console.log('✅ Prayer clock initialized');
+            console.log('? Prayer clock initialized');
         } else {
-            console.warn('⚠️ Clock elements not found');
+            console.warn('?? Clock elements not found');
         }
         
         streakTracker = new StreakTracker();
         notifications = new PrayerNotifications();
         themeController = new ThemeController();
-        console.log('✅ Features initialized');
+        console.log('? Features initialized');
         
         // Render UIs
         streakTracker.renderUI();
         notifications.renderSettingsUI();
         themeController.renderToggleUI();
         initQibla();
-        console.log('✅ UIs rendered');
+        console.log('? UIs rendered');
         
         // Load zones and setup event listeners
-        loadZones();
-        console.log('✅ Zones loaded');
+    loadZones();
+        console.log('? Zones loaded');
         
         const detectBtn = document.getElementById('detect-location');
         const zoneSelect = document.getElementById('zone-select');
@@ -1088,11 +818,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (zoneSelect) {
             zoneSelect.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    currentZone = e.target.value;
-                    loadPrayerTimes(e.target.value);
-                }
-            });
+        if (e.target.value) {
+            currentZone = e.target.value;
+            loadPrayerTimes(e.target.value);
+        }
+    });
         }
         
         // Listen for prayer check-ins
@@ -1110,10 +840,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 60000);
         
-        console.log('✅ App fully initialized!');
+        console.log('? App fully initialized!');
         
     } catch (error) {
-        console.error('❌ Initialization error:', error);
+        console.error('? Initialization error:', error);
         alert('Ralat memulakan aplikasi: ' + error.message);
     }
 });
@@ -1145,7 +875,7 @@ function loadZones() {
 }
 
 async function loadPrayerTimes(zone) {
-    console.log('🔄 Loading prayer times for zone:', zone);
+    console.log('?? Loading prayer times for zone:', zone);
     
     const loading = document.getElementById('loading');
     const content = document.getElementById('content');
@@ -1157,14 +887,14 @@ async function loadPrayerTimes(zone) {
     
     try {
         prayerData = await fetchPrayerTimes(zone);
-        console.log('✅ Prayer data received:', prayerData);
+        console.log('? Prayer data received:', prayerData);
         
         displayPrayerTimes(prayerData, zone);
         
         // Update all features
         if (prayerClock) {
             prayerClock.setPrayerTimes(prayerData);
-            console.log('✅ Clock updated');
+            console.log('? Clock updated');
         }
         if (notifications && notifications.settings.enabled) {
             notifications.schedulePrayerNotifications(prayerData);
@@ -1174,24 +904,24 @@ async function loadPrayerTimes(zone) {
         }
         
     } catch (err) {
-        console.error('❌ Error loading prayer times:', err);
+        console.error('? Error loading prayer times:', err);
         if (error) {
-            error.textContent = '❌ Gagal memuat waktu solat. Sila cuba lagi. (' + err.message + ')';
-            error.style.display = 'block';
+            error.textContent = '? Gagal memuat waktu solat. Sila cuba lagi. (' + err.message + ')';
+        error.style.display = 'block';
         }
         if (loading) loading.style.display = 'none';
     }
 }
 
 function displayPrayerTimes(data, zone) {
-    console.log('📅 Displaying prayer times for zone:', zone);
+    console.log('?? Displaying prayer times for zone:', zone);
     
     try {
         const dateEl = document.getElementById('current-date');
         if (dateEl) {
             dateEl.textContent = new Date().toLocaleDateString('ms-MY', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-            });
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
         }
         
         const hijriEl = document.getElementById('hijri-date');
@@ -1199,37 +929,37 @@ function displayPrayerTimes(data, zone) {
             hijriEl.textContent = formatHijriDate(data.hijri || data.hijriDate || '');
         }
     
-        const zoneInfo = zones.find(z => z.zone === zone);
-        if (zoneInfo) {
+    const zoneInfo = zones.find(z => z.zone === zone);
+    if (zoneInfo) {
             const locNameEl = document.getElementById('location-name');
             const locDetailEl = document.getElementById('location-detail');
             if (locNameEl) locNameEl.textContent = zoneInfo.lokasi;
-            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} • Zon ${zone}`;
+            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} � Zon ${zone}`;
+    }
+    
+    const container = document.getElementById('prayer-times');
+        if (container) {
+    container.innerHTML = '';
+    
+    prayerOrder.forEach(prayer => {
+        let time = null;
+        for (const key of prayer.keys) {
+            if (data[key]) {
+                time = typeof data[key] === 'object' ? data[key].time : data[key];
+                break;
+            }
         }
         
-        const container = document.getElementById('prayer-times');
-        if (container) {
-            container.innerHTML = '';
-            
-            prayerOrder.forEach(prayer => {
-                let time = null;
-                for (const key of prayer.keys) {
-                    if (data[key]) {
-                        time = typeof data[key] === 'object' ? data[key].time : data[key];
-                        break;
-                    }
-                }
-                
-                if (time) {
-                    const div = document.createElement('div');
-                    div.className = 'prayer-item';
-                    div.innerHTML = `
-                        <div class="prayer-name">${prayer.display}</div>
-                        <div class="prayer-time">${time}</div>
-                    `;
-                    container.appendChild(div);
-                }
-            });
+        if (time) {
+            const div = document.createElement('div');
+            div.className = 'prayer-item';
+            div.innerHTML = `
+                <div class="prayer-name">${prayer.display}</div>
+                <div class="prayer-time">${time}</div>
+            `;
+            container.appendChild(div);
+        }
+    });
         }
         
         const loadingEl = document.getElementById('loading');
@@ -1237,10 +967,10 @@ function displayPrayerTimes(data, zone) {
         if (loadingEl) loadingEl.style.display = 'none';
         if (contentEl) contentEl.style.display = 'block';
         
-        console.log('✅ Prayer times displayed successfully');
+        console.log('? Prayer times displayed successfully');
         
     } catch (error) {
-        console.error('❌ Error in displayPrayerTimes:', error);
+        console.error('? Error in displayPrayerTimes:', error);
     }
 }
 
@@ -1249,17 +979,21 @@ function detectLocation() {
     const status = document.getElementById('location-status');
     
     if (!navigator.geolocation) {
-        status.textContent = '❌ Pelayar tidak menyokong geolocation';
+        if (status) {
+        status.textContent = 'Pelayar tidak menyokong geolocation';
         status.className = 'location-status error';
         status.style.display = 'block';
+        }
         return;
     }
     
-    btn.disabled = true;
-    btn.textContent = '📍 Mengesan...';
-    status.textContent = '🔍 Mengesan lokasi...';
+    if (btn) btn.disabled = true;
+    if (btn) btn.textContent = 'Mengesan...';
+    if (status) {
+    status.textContent = 'Mengesan lokasi...';
     status.className = 'location-status info';
     status.style.display = 'block';
+    }
     
     navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -1277,21 +1011,32 @@ function detectLocation() {
                 }
             });
             
-            document.getElementById('zone-select').value = nearest.zone;
+            const zoneSelect = document.getElementById('zone-select');
+            if (zoneSelect) {
+                zoneSelect.value = nearest.zone;
             currentZone = nearest.zone;
             loadPrayerTimes(nearest.zone);
+            }
             
-            status.textContent = `✅ Lokasi: ${nearest.lokasi}`;
+            if (status) {
+            status.textContent = `Lokasi: ${nearest.lokasi}`;
             status.className = 'location-status success';
+            }
+            if (btn) {
             btn.disabled = false;
-            btn.textContent = '📍 Kesan Lokasi Saya';
-            setTimeout(() => status.style.display = 'none', 3000);
+                btn.textContent = '?? Kesan Lokasi Saya';
+            }
+            setTimeout(() => { if (status) status.style.display = 'none'; }, 3000);
         },
         (err) => {
-            status.textContent = '❌ Tidak dapat mengesan lokasi';
+            if (status) {
+            status.textContent = 'Tidak dapat mengesan lokasi';
             status.className = 'location-status error';
+            }
+            if (btn) {
             btn.disabled = false;
-            btn.textContent = '📍 Kesan Lokasi Saya';
+                btn.textContent = '?? Kesan Lokasi Saya';
+            }
         }
     );
 }

@@ -516,22 +516,37 @@ class PrayerNotifications {
         const container = document.getElementById('notification-settings');
         if (!container) return;
         
-        // Check if Notification API is available
-        if (!('Notification' in window)) {
+        // Check if Notification API is available (with better detection)
+        const hasNotificationAPI = 'Notification' in window || 'webkitNotifications' in window;
+        
+        if (!hasNotificationAPI) {
             container.innerHTML = `
                 <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
-                <div class="notification-denied">⚠️ Pelayar anda tidak menyokong notifikasi</div>
+                <div style="padding: 15px; background: rgba(255, 193, 7, 0.2); border-radius: 10px; margin: 10px 0;">
+                    <p style="margin: 0; color: #856404;">ℹ️ Notifikasi tidak disokong oleh pelayar ini. Cuba gunakan Chrome atau Safari terkini.</p>
+                </div>
             `;
             return;
         }
         
-        const isEnabled = this.settings.enabled && Notification.permission === 'granted';
-        const canRequest = Notification.permission !== 'denied';
+        const isEnabled = this.settings.enabled && 'Notification' in window && Notification.permission === 'granted';
+        const canRequest = 'Notification' in window && Notification.permission !== 'denied';
+        const permission = 'Notification' in window ? Notification.permission : 'default';
         
         container.innerHTML = `
             <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
-            ${!isEnabled && canRequest ? '<button class="enable-notifications-btn" id="enable-notifications">Aktifkan Notifikasi</button>' : ''}
+            
+            ${!isEnabled && canRequest ? `
+                <button class="enable-notifications-btn" id="enable-notifications">✅ Aktifkan Notifikasi</button>
+                <div style="padding: 10px; margin-top: 10px; font-size: 0.85rem; color: #999; text-align: center;">
+                    Dapatkan peringatan sebelum waktu solat masuk
+                </div>
+            ` : ''}
+            
             ${isEnabled ? `
+                <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; margin-bottom: 15px; color: #10b981; text-align: center;">
+                    ✓ Notifikasi diaktifkan
+                </div>
                 <div class="settings-group">
                     <label>Peringatan sebelum:</label>
                     <select id="reminder-minutes">
@@ -541,9 +556,20 @@ class PrayerNotifications {
                 <div class="settings-group">
                     <label><input type="checkbox" id="sound-toggle" ${this.settings.sound ? 'checked' : ''}> Bunyi notifikasi</label>
                 </div>
-                <button class="disable-notifications-btn" id="disable-notifications">Matikan Notifikasi</button>
+                <button class="disable-notifications-btn" id="disable-notifications" style="background: #dc2626;">Matikan Notifikasi</button>
             ` : ''}
-            ${Notification.permission === 'denied' ? '<div class="notification-denied">⚠️ Notifikasi dihalang. Sila benarkan di tetapan pelayar.</div>' : ''}
+            
+            ${permission === 'denied' ? `
+                <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px; color: #dc2626;">
+                    <p style="margin: 0;">⚠️ Notifikasi dihalang oleh pelayar.</p>
+                    <p style="margin: 10px 0 0 0; font-size: 0.85rem;">Untuk mengaktifkan:</p>
+                    <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.85rem;">
+                        <li>Buka Settings → Safari → Advanced</li>
+                        <li>Cari website ini dan benarkan notifikasi</li>
+                        <li>Muat semula halaman</li>
+                    </ol>
+                </div>
+            ` : ''}
         `;
         
         document.getElementById('enable-notifications')?.addEventListener('click', async () => {
@@ -766,43 +792,104 @@ class ARQiblaFinder {
         const cx = width / 2;
         const cy = height / 2;
         
+        // First check if camera is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            container.innerHTML = `
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; padding: 40px; background: #000;">
+                    <div style="background: rgba(107, 70, 193, 0.9); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px;">
+                        <div style="font-size: 5rem; margin-bottom: 20px;">🧭</div>
+                        <h3 style="font-size: 2rem; margin-bottom: 15px;">Arah Kiblat</h3>
+                        <div style="font-size: 3rem; font-weight: bold; color: #10b981; margin: 20px 0;">${Math.round(qiblaData.direction)}°</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px;">Jarak ke Kaabah:</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${Math.round(qiblaData.distance).toLocaleString()} km</div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 0.9rem;">
+                            ℹ️ Kamera tidak tersedia. Gunakan kompas dan hadapkan ke arah ${Math.round(qiblaData.direction)}° dari Utara.
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Show loading first
         container.innerHTML = `
-            <video id="qibla-camera" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
-            <div id="qibla-compass-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
-                <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="position: absolute;">
-                    <!-- Compass circles -->
-                    <circle cx="${cx}" cy="${cy}" r="120" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-                    <circle cx="${cx}" cy="${cy}" r="100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
-                    
-                    <!-- Direction markers -->
-                    <text x="${cx}" y="${cy - 140}" text-anchor="middle" fill="white" font-size="24" font-weight="bold">N</text>
-                    <text x="${cx + 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20">E</text>
-                    <text x="${cx}" y="${cy + 160}" text-anchor="middle" fill="white" font-size="20">S</text>
-                    <text x="${cx - 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20">W</text>
-                    
-                    <!-- Qibla arrow (will be rotated by JavaScript) -->
-                    <g id="qibla-arrow" style="transform-origin: ${cx}px ${cy}px;">
-                        <path d="M ${cx} ${cy - 90} L ${cx - 12} ${cy - 30} L ${cx} ${cy - 35} L ${cx + 12} ${cy - 30} Z" fill="#10b981" stroke="white" stroke-width="3"/>
-                        <circle cx="${cx}" cy="${cy}" r="10" fill="#10b981" stroke="white" stroke-width="3"/>
-                        <text x="${cx}" y="${cy - 100}" text-anchor="middle" fill="white" font-size="24" font-weight="bold">🕋</text>
-                    </g>
-                </svg>
-                
-                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(107, 70, 193, 0.95); padding: 20px 30px; border-radius: 15px; color: white; text-align: center; max-width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                    <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">Pusingkan Telefon ke Arah Kiblat</div>
-                    <div style="font-size: 1rem;">Bila anak panah hijau 🕋 menghala ke atas = Arah Kiblat ✓</div>
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; color: white;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">📹</div>
+                    <div style="font-size: 1.5rem;">Membuka kamera...</div>
                 </div>
             </div>
         `;
         
         try {
-            const video = document.getElementById('qibla-camera');
+            // Request camera access first
+            console.log('🎥 Requesting camera access...');
             this.videoStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: { 
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
             });
-            video.srcObject = this.videoStream;
+            console.log('✅ Camera access granted!');
+            
+            // Now set up the AR view
+            container.innerHTML = `
+                <video id="qibla-camera" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;"></video>
+                <div id="qibla-compass-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="position: absolute;">
+                        <!-- Compass circles -->
+                        <circle cx="${cx}" cy="${cy}" r="120" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                        <circle cx="${cx}" cy="${cy}" r="100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+                        
+                        <!-- Direction markers -->
+                        <text x="${cx}" y="${cy - 140}" text-anchor="middle" fill="white" font-size="24" font-weight="bold">N</text>
+                        <text x="${cx + 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20">E</text>
+                        <text x="${cx}" y="${cy + 160}" text-anchor="middle" fill="white" font-size="20">S</text>
+                        <text x="${cx - 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20">W</text>
+                        
+                        <!-- Qibla arrow (will be rotated by JavaScript) -->
+                        <g id="qibla-arrow" style="transform-origin: ${cx}px ${cy}px;">
+                            <path d="M ${cx} ${cy - 90} L ${cx - 12} ${cy - 30} L ${cx} ${cy - 35} L ${cx + 12} ${cy - 30} Z" fill="#10b981" stroke="white" stroke-width="3"/>
+                            <circle cx="${cx}" cy="${cy}" r="10" fill="#10b981" stroke="white" stroke-width="3"/>
+                            <text x="${cx}" y="${cy - 100}" text-anchor="middle" fill="white" font-size="24" font-weight="bold">🕋</text>
+                        </g>
+                    </svg>
+                    
+                    <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(107, 70, 193, 0.95); padding: 20px 30px; border-radius: 15px; color: white; text-align: center; max-width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                        <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">Pusingkan Telefon ke Arah Kiblat</div>
+                        <div style="font-size: 1rem;">Bila anak panah hijau 🕋 menghala ke atas = Arah Kiblat ✓</div>
+                    </div>
+                </div>
+            `;
+            
+            // Connect stream to video after DOM is ready
+            setTimeout(() => {
+                const video = document.getElementById('qibla-camera');
+                if (video && this.videoStream) {
+                    video.srcObject = this.videoStream;
+                    video.play().catch(e => console.error('Video play error:', e));
+                    console.log('✅ Camera stream connected!');
+                }
+            }, 100);
+            
         } catch (error) {
-            container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 20px;">❌ Tidak dapat mengakses kamera. Sila benarkan akses kamera.</div>';
+            console.error('❌ Camera error:', error);
+            container.innerHTML = `
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; padding: 40px; background: #000;">
+                    <div style="background: rgba(107, 70, 193, 0.9); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px;">
+                        <div style="font-size: 5rem; margin-bottom: 20px;">🧭</div>
+                        <h3 style="font-size: 2rem; margin-bottom: 15px;">Arah Kiblat</h3>
+                        <div style="font-size: 3rem; font-weight: bold; color: #10b981; margin: 20px 0;">${Math.round(qiblaData.direction)}°</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px;">Jarak ke Kaabah:</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${Math.round(qiblaData.distance).toLocaleString()} km</div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 0.9rem;">
+                            ⚠️ Tidak dapat mengakses kamera (${error.name}). Gunakan kompas dan hadapkan ke arah ${Math.round(qiblaData.direction)}° dari Utara.
+                        </div>
+                    </div>
+                </div>
+            `;
         }
     }
     

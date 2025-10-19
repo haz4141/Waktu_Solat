@@ -663,72 +663,21 @@ class ThemeController {
     }
 }
 
-// ===== FEATURE 5: AR QIBLA FINDER (Like Google's) =====
+// ===== FEATURE 5: QIBLA FINDER (Using Google's Implementation) =====
 let qiblaFinder = null;
 
 class ARQiblaFinder {
     constructor() {
-        this.userLocation = null;
-        this.qiblaDirection = null;
-        this.deviceHeading = 0;
         this.isActive = false;
-        this.videoStream = null;
-        this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
     
-    calculateQibla(userLat, userLng) {
-        const kaaba = { lat: 21.4225, lng: 39.8262 };
-        
-        const lat1 = userLat * Math.PI / 180;
-        const lat2 = kaaba.lat * Math.PI / 180;
-        const dLng = (kaaba.lng - userLng) * Math.PI / 180;
-        
-        const y = Math.sin(dLng);
-        const x = Math.cos(lat1) * Math.tan(lat2) - Math.sin(lat1) * Math.cos(dLng);
-        let qibla = Math.atan2(y, x) * 180 / Math.PI;
-        qibla = (qibla + 360) % 360;
-        
-        const R = 6371;
-        const dLat = (kaaba.lat - userLat) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                 Math.cos(userLat * Math.PI / 180) * Math.cos(kaaba.lat * Math.PI / 180) *
-                 Math.sin(dLng/2) * Math.sin(dLng/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distance = R * c;
-        
-        return { direction: qibla, distance: distance };
+    open() {
+        // Simply embed Google's Qibla Finder - it's perfect and already works!
+        this.createGoogleQiblaView();
     }
     
-    async open() {
-        if (!navigator.geolocation) {
-            alert('Pelayar tidak menyokong geolocation');
-            return;
-        }
-        
-        try {
-            // Get user location
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject);
-            });
-            
-            this.userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            
-            const qiblaData = this.calculateQibla(this.userLocation.lat, this.userLocation.lng);
-            this.qiblaDirection = qiblaData.direction;
-            
-            // Create fullscreen AR view
-            this.createARView(qiblaData);
-            
-        } catch (error) {
-            alert('Tidak dapat mengesan lokasi. Sila benarkan akses lokasi.');
-        }
-    }
-    
-    createARView(qiblaData) {
-        // Create fullscreen overlay
+    createGoogleQiblaView() {
+        // Create fullscreen overlay with embedded Google Qibla Finder
         const overlay = document.createElement('div');
         overlay.id = 'qibla-ar-overlay';
         overlay.style.cssText = `
@@ -743,57 +692,93 @@ class ARQiblaFinder {
             flex-direction: column;
         `;
         
-        // Header
+        // Header with close button
         const header = document.createElement('div');
         header.style.cssText = `
-            padding: 20px;
-            background: rgba(107, 70, 193, 0.9);
+            padding: 15px 20px;
+            background: rgba(107, 70, 193, 0.95);
             color: white;
-            text-align: center;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         `;
         header.innerHTML = `
-            <button onclick="qiblaFinder.close()" style="position: absolute; left: 20px; top: 20px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 10px 15px; border-radius: 5px; cursor: pointer;">✕ Tutup</button>
-            <h2 style="margin: 0;">🕋 Arah Kiblat</h2>
-            <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Arah: <strong>${Math.round(qiblaData.direction)}°</strong> | Jarak: <strong>${Math.round(qiblaData.distance).toLocaleString()} km</strong></p>
+            <h2 style="margin: 0; font-size: 1.2rem;">🕋 Arah Kiblat (Powered by Google)</h2>
+            <button onclick="qiblaFinder.close()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold;">✕ Tutup</button>
         `;
         
-        // Main content area
-        const content = document.createElement('div');
-        content.style.cssText = `
+        // Iframe container
+        const iframeContainer = document.createElement('div');
+        iframeContainer.style.cssText = `
             flex: 1;
             position: relative;
-            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            background: #000;
         `;
         
-        if (this.isMobile) {
-            // Mobile: Camera + AR Compass
-            this.setupCameraView(content, qiblaData);
-        } else {
-            // Desktop: Map View
-            this.setupMapView(content, qiblaData);
-        }
+        // Embed Google's Qibla Finder
+        iframeContainer.innerHTML = `
+            <iframe 
+                src="https://qiblafinder.withgoogle.com/intl/en/finder/ar" 
+                style="width: 100%; height: 100%; border: none;"
+                allow="camera; geolocation; accelerometer; magnetometer; gyroscope"
+                allowfullscreen
+            ></iframe>
+        `;
         
         overlay.appendChild(header);
-        overlay.appendChild(content);
+        overlay.appendChild(iframeContainer);
         document.body.appendChild(overlay);
         
         this.isActive = true;
-        
-        // Start compass tracking if mobile
-        if (this.isMobile) {
-            this.startCompassTracking(content);
-        }
+        console.log('🕋 Google Qibla Finder opened');
     }
     
-    async setupCameraView(container, qiblaData) {
-        const width = container.clientWidth || window.innerWidth;
-        const height = container.clientHeight || window.innerHeight;
-        const cx = width / 2;
-        const cy = height / 2;
+    close() {
+        this.isActive = false;
         
-        // First check if camera is available
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        // Remove overlay (the iframe will be removed with it)
+        const overlay = document.getElementById('qibla-ar-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        
+        console.log('🔴 Qibla finder closed');
+    }
+}
+
+function initQibla() {
+    qiblaFinder = new ARQiblaFinder();
+    
+    const compact = document.getElementById('qibla-compact');
+    if (compact) {
+        compact.addEventListener('click', () => {
+            qiblaFinder.open();
+        });
+    }
+}
+
+// ===== HELPER FUNCTIONS =====
+async function fetchPrayerTimes(zone) {
+    const response = await fetch(`https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone=${zone}`);
+    const data = await response.json();
+    return data.prayerTime ? data.prayerTime[0] : (data.data ? data.data[0] : data);
+}
+
+function formatHijriDate(hijriStr) {
+    if (!hijriStr) return '';
+    const parts = hijriStr.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts[0].length === 4 ? parts : [parts[2], parts[1], parts[0]];
+        return `${parseInt(day)} ${hijriMonths[month] || month} ${year}`;
+    }
+    return hijriStr;
+}
+
+// ===== MAIN APP INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
             container.innerHTML = `
                 <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; padding: 40px; background: #000;">
                     <div style="background: rgba(107, 70, 193, 0.9); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px;">
@@ -1024,20 +1009,7 @@ class ARQiblaFinder {
     close() {
         this.isActive = false;
         
-        // Stop camera stream
-        if (this.videoStream) {
-            this.videoStream.getTracks().forEach(track => track.stop());
-            this.videoStream = null;
-        }
-        
-        // Remove orientation event listener
-        if (this.orientationHandler && this.orientationEventType) {
-            window.removeEventListener(this.orientationEventType, this.orientationHandler, true);
-            this.orientationHandler = null;
-            this.orientationEventType = null;
-        }
-        
-        // Remove overlay
+        // Remove overlay (the iframe will be removed with it)
         const overlay = document.getElementById('qibla-ar-overlay');
         if (overlay) {
             overlay.remove();

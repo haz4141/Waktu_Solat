@@ -388,7 +388,7 @@ class StreakTracker {
                     return `
                         <div class="checklist-item ${checked ? 'checked' : ''}">
                             <button class="check-btn" data-prayer="${prayer}" ${checked ? 'disabled' : ''}>
-                                ${checked ? '?' : '?'}
+                                ${checked ? '✅' : '⭕'}
                             </button>
                             <span>${prayer}</span>
                         </div>
@@ -541,11 +541,17 @@ class PrayerNotifications {
                 <div style="padding: 10px; margin-top: 10px; font-size: 0.85rem; color: #999; text-align: center;">
                     Dapatkan peringatan sebelum waktu solat masuk
                 </div>
+                <div style="padding: 10px; margin-top: 5px; font-size: 0.8rem; color: #f59e0b; text-align: center; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                    ℹ️ Notifikasi hanya berfungsi di PC/Desktop buat masa ini
+                </div>
             ` : ''}
             
             ${isEnabled ? `
                 <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; margin-bottom: 15px; color: #10b981; text-align: center;">
-                    ? Notifikasi diaktifkan
+                    ✅ Notifikasi diaktifkan
+                </div>
+                <div style="padding: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #f59e0b; text-align: center; background: rgba(245, 158, 11, 0.1); border-radius: 8px;">
+                    ℹ️ Notifikasi hanya berfungsi di PC/Desktop buat masa ini
                 </div>
                 <div class="settings-group">
                     <label>Peringatan sebelum:</label>

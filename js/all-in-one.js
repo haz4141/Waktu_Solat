@@ -1,4 +1,4 @@
-// ===== WAKTU SOLAT MALAYSIA - ALL FEATURES IN ONE =====
+﻿// ===== WAKTU SOLAT MALAYSIA - ALL FEATURES IN ONE =====
 // Complete implementation with all 5 unique features!
 
 const API_BASE = 'https://api.waktusolat.app';
@@ -371,7 +371,7 @@ class StreakTracker {
         const message = this.getMotivationalMessage();
         
         container.innerHTML = `
-            <div class="streak-header"><h3>?? Pencapaian Hari Ini</h3></div>
+            <div class="streak-header"><h3>📊 Pencapaian Hari Ini</h3></div>
             <div class="streak-progress">
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: ${progress.percentage}%"></div>
@@ -379,7 +379,7 @@ class StreakTracker {
                 <div class="progress-text">${progress.completed}/${progress.total} solat</div>
             </div>
             <div class="streak-counter ${this.streakData.current > 0 ? 'streak-fire' : ''}">
-                ?? <strong>${this.streakData.current}</strong> hari berturut-turut
+                🔥 <strong>${this.streakData.current}</strong> hari berturut-turut
             </div>
             <div class="streak-message">${message}</div>
             <div class="prayer-checklist">
@@ -416,12 +416,12 @@ class StreakTracker {
         const streak = this.streakData.current;
         const progress = this.getTodayProgress();
         
-        if (progress.completed === 5) return '?? Tahniah! Anda telah sempurna hari ini!';
-        if (streak >= 30) return `?? Hebat! ${streak} hari berturut-turut!`;
-        if (streak >= 7) return `? Bagus! ${streak} hari streak!`;
-        if (progress.completed >= 3) return '?? Teruskan usaha anda!';
-        if (progress.completed >= 1) return '?? Permulaan yang baik!';
-        return '?? Jom mulakan hari dengan solat!';
+        if (progress.completed === 5) return '🎉 Tahniah! Anda telah sempurna hari ini!';
+        if (streak >= 30) return `🔥 Hebat! ${streak} hari berturut-turut!`;
+        if (streak >= 7) return `✨ Bagus! ${streak} hari streak!`;
+        if (progress.completed >= 3) return '💪 Teruskan usaha anda!';
+        if (progress.completed >= 1) return '👍 Permulaan yang baik!';
+        return '🕌 Jom mulakan hari dengan solat!';
     }
 }
 
@@ -462,7 +462,7 @@ class PrayerNotifications {
         if (!('Notification' in window)) return;
         
         if (Notification.permission === 'granted') {
-            const notification = new Notification(title, { body, icon: '??', badge: '??' });
+            const notification = new Notification(title, { body, icon: '🕌', badge: '🕌' });
             notification.onclick = () => { window.focus(); notification.close(); };
             setTimeout(() => notification.close(), 10000);
         }
@@ -500,7 +500,7 @@ class PrayerNotifications {
                 }
                 
                 const exactTimeoutId = setTimeout(() => {
-                    this.showNotification(`?? Masuk Waktu ${prayer.name}`, `Sekarang waktu solat ${prayer.name} (${prayer.time})`, true);
+                    this.showNotification(`🕌 Masuk Waktu ${prayer.name}`, `Sekarang waktu solat ${prayer.name} (${prayer.time})`, true);
                 }, prayerTime - now);
                 this.scheduledNotifications.push(exactTimeoutId);
             }
@@ -521,9 +521,9 @@ class PrayerNotifications {
         
         if (!hasNotificationAPI) {
             container.innerHTML = `
-                <div class="settings-header"><h3>?? Tetapan Notifikasi</h3></div>
+                <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
                 <div style="padding: 15px; background: rgba(255, 193, 7, 0.2); border-radius: 10px; margin: 10px 0;">
-                    <p style="margin: 0; color: #856404;">?? Notifikasi tidak disokong oleh pelayar ini. Cuba gunakan Chrome atau Safari terkini.</p>
+                    <p style="margin: 0; color: #856404;">ℹ️ Notifikasi tidak disokong oleh pelayar ini. Cuba gunakan Chrome atau Safari terkini.</p>
                 </div>
             `;
             return;
@@ -534,10 +534,10 @@ class PrayerNotifications {
         const permission = 'Notification' in window ? Notification.permission : 'default';
         
         container.innerHTML = `
-            <div class="settings-header"><h3>?? Tetapan Notifikasi</h3></div>
+            <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
             
             ${!isEnabled && canRequest ? `
-                <button class="enable-notifications-btn" id="enable-notifications">? Aktifkan Notifikasi</button>
+                <button class="enable-notifications-btn" id="enable-notifications">✅ Aktifkan Notifikasi</button>
                 <div style="padding: 10px; margin-top: 10px; font-size: 0.85rem; color: #999; text-align: center;">
                     Dapatkan peringatan sebelum waktu solat masuk
                 </div>
@@ -561,10 +561,10 @@ class PrayerNotifications {
             
             ${permission === 'denied' ? `
                 <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 10px; color: #dc2626;">
-                    <p style="margin: 0;">?? Notifikasi dihalang oleh pelayar.</p>
+                    <p style="margin: 0;">⚠️ Notifikasi dihalang oleh pelayar.</p>
                     <p style="margin: 10px 0 0 0; font-size: 0.85rem;">Untuk mengaktifkan:</p>
                     <ol style="margin: 5px 0; padding-left: 20px; font-size: 0.85rem;">
-                        <li>Buka Settings ? Safari ? Advanced</li>
+                        <li>Buka Settings → Safari → Advanced</li>
                         <li>Cari website ini dan benarkan notifikasi</li>
                         <li>Muat semula halaman</li>
                     </ol>
@@ -672,68 +672,18 @@ class ARQiblaFinder {
     }
     
     open() {
-        // Simply embed Google's Qibla Finder - it's perfect and already works!
-        this.createGoogleQiblaView();
-    }
-    
-    createGoogleQiblaView() {
-        // Create fullscreen overlay with embedded Google Qibla Finder
-        const overlay = document.createElement('div');
-        overlay.id = 'qibla-ar-overlay';
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-        `;
+        // Open Google's Qibla Finder in a new window (iframe has camera permission issues)
+        const qiblaURL = 'https://qiblafinder.withgoogle.com/intl/en/finder/ar';
+        const qiblaWindow = window.open(qiblaURL, 'QiblaFinder', 'width=400,height=700,location=no,menubar=no,toolbar=no');
         
-        // Header with close button
-        const header = document.createElement('div');
-        header.style.cssText = `
-            padding: 15px 20px;
-            background: rgba(107, 70, 193, 0.95);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        `;
-        header.innerHTML = `
-            <h2 style="margin: 0; font-size: 1.2rem;">?? Arah Kiblat (Powered by Google)</h2>
-            <button onclick="qiblaFinder.close()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold;">? Tutup</button>
-        `;
+        if (!qiblaWindow) {
+            // If popup was blocked, fallback to direct navigation
+            if (confirm('🕋 Arah Kiblat\n\nBuka Google Qibla Finder?\n\n(Akan membuka tab baru)')) {
+                window.open(qiblaURL, '_blank');
+            }
+        }
         
-        // Iframe container
-        const iframeContainer = document.createElement('div');
-        iframeContainer.style.cssText = `
-            flex: 1;
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        `;
-        
-        // Embed Google's Qibla Finder
-        iframeContainer.innerHTML = `
-            <iframe 
-                src="https://qiblafinder.withgoogle.com/intl/en/finder/ar" 
-                style="width: 100%; height: 100%; border: none;"
-                allow="camera; geolocation; accelerometer; magnetometer; gyroscope"
-                allowfullscreen
-            ></iframe>
-        `;
-        
-        overlay.appendChild(header);
-        overlay.appendChild(iframeContainer);
-        document.body.appendChild(overlay);
-        
-        this.isActive = true;
-        console.log('?? Google Qibla Finder opened');
+        console.log('🕋 Google Qibla Finder opened in new window');
     }
     
     close() {
@@ -745,7 +695,7 @@ class ARQiblaFinder {
             overlay.remove();
         }
         
-        console.log('?? Qibla finder closed');
+        console.log('🔴 Qibla finder closed');
     }
 }
 
@@ -779,7 +729,7 @@ function formatHijriDate(hijriStr) {
 
 // ===== MAIN APP INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('?? App initializing...');
+    console.log('🚀 App initializing...');
     
     try {
         // Initialize all features with error handling
@@ -788,9 +738,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (canvas && center) {
             prayerClock = new PrayerClock('clock-canvas', 'clock-center');
-            console.log('? Prayer clock initialized');
+            console.log('✅ Prayer clock initialized');
         } else {
-            console.warn('?? Clock elements not found');
+            console.warn('⚠️ Clock elements not found');
         }
         
         streakTracker = new StreakTracker();
@@ -875,7 +825,7 @@ function loadZones() {
 }
 
 async function loadPrayerTimes(zone) {
-    console.log('?? Loading prayer times for zone:', zone);
+    console.log('🔄 Loading prayer times for zone:', zone);
     
     const loading = document.getElementById('loading');
     const content = document.getElementById('content');
@@ -914,7 +864,7 @@ async function loadPrayerTimes(zone) {
 }
 
 function displayPrayerTimes(data, zone) {
-    console.log('?? Displaying prayer times for zone:', zone);
+    console.log('📅 Displaying prayer times for zone:', zone);
     
     try {
         const dateEl = document.getElementById('current-date');
@@ -934,7 +884,7 @@ function displayPrayerTimes(data, zone) {
             const locNameEl = document.getElementById('location-name');
             const locDetailEl = document.getElementById('location-detail');
             if (locNameEl) locNameEl.textContent = zoneInfo.lokasi;
-            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} � Zon ${zone}`;
+            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} � Zon ${zone}`;
     }
     
     const container = document.getElementById('prayer-times');
@@ -1024,7 +974,7 @@ function detectLocation() {
             }
             if (btn) {
             btn.disabled = false;
-                btn.textContent = '?? Kesan Lokasi Saya';
+                btn.textContent = '📍 Kesan Lokasi Saya';
             }
             setTimeout(() => { if (status) status.style.display = 'none'; }, 3000);
         },
@@ -1035,7 +985,7 @@ function detectLocation() {
             }
             if (btn) {
             btn.disabled = false;
-                btn.textContent = '?? Kesan Lokasi Saya';
+                btn.textContent = '📍 Kesan Lokasi Saya';
             }
         }
     );

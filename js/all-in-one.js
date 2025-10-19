@@ -85,142 +85,24 @@ const hijriMonths = {
 // ===== GLOBAL STATE =====
 let currentZone = 'WLY01';
 let prayerData = null;
-let prayerClock = null;
+let countdownTimer = null;
 let streakTracker = null;
 let notifications = null;
 let themeController = null;
 
-// ===== FEATURE 1: CIRCULAR PRAYER CLOCK (KILLER FEATURE!) =====
-class PrayerClock {
-    constructor(canvasId, centerDivId) {
-        this.canvas = document.getElementById(canvasId);
-        if (!this.canvas) return;
-        
-        this.ctx = this.canvas.getContext('2d');
-        this.centerDiv = document.getElementById(centerDivId);
+// ===== FEATURE 1: SIMPLE COUNTDOWN TIMER =====
+class CountdownTimer {
+    constructor() {
+        this.prayerNameEl = document.getElementById('countdown-prayer');
+        this.timerEl = document.getElementById('countdown-timer');
+        this.timeEl = document.getElementById('countdown-time');
         this.prayerTimes = null;
-        this.animationFrame = null;
-        
-        this.colors = {
-            'Imsak': '#9b59b6', 'Subuh': '#b993d6', 'Syuruk': '#f39c12',
-            'Zohor': '#3498db', 'Asar': '#e67e22', 'Maghrib': '#e74c3c', 'Isyak': '#2c3e50'
-        };
-        
-        this.setupCanvas();
-    }
-    
-    setupCanvas() {
-        if (!this.canvas || !this.canvas.parentElement) return;
-        
-        try {
-            const size = Math.min(this.canvas.parentElement.clientWidth - 40, 350);
-            this.canvas.width = size;
-            this.canvas.height = size;
-            this.canvas.style.width = size + 'px';
-            this.canvas.style.height = size + 'px';
-            this.centerX = size / 2;
-            this.centerY = size / 2;
-            this.radius = (size / 2) - 30;
-        } catch (error) {
-            console.error('Error in setupCanvas:', error);
-        }
+        this.intervalId = null;
     }
     
     setPrayerTimes(data) {
         this.prayerTimes = data;
-        this.draw();
-        this.startAnimation();
-    }
-    
-    timeToAngle(timeStr) {
-        if (!timeStr) return 0;
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        const totalMinutes = hours * 60 + minutes;
-        return (totalMinutes / (24 * 60)) * 2 * Math.PI - Math.PI / 2;
-    }
-    
-    getCurrentTimeAngle() {
-        const now = new Date();
-        const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-        return (totalSeconds / (24 * 3600)) * 2 * Math.PI - Math.PI / 2;
-    }
-    
-    draw() {
-        if (!this.prayerTimes || !this.ctx || !this.canvas) return;
-        
-        try {
-            const ctx = this.ctx;
-            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        const prayers = [
-            { name: 'Imsak', time: this.prayerTimes.imsak },
-            { name: 'Subuh', time: this.prayerTimes.subuh || this.prayerTimes.fajr },
-            { name: 'Syuruk', time: this.prayerTimes.syuruk || this.prayerTimes.sunrise },
-            { name: 'Zohor', time: this.prayerTimes.zohor || this.prayerTimes.dhuhr },
-            { name: 'Asar', time: this.prayerTimes.asar || this.prayerTimes.asr },
-            { name: 'Maghrib', time: this.prayerTimes.maghrib },
-            { name: 'Isyak', time: this.prayerTimes.isyak || this.prayerTimes.isha }
-        ].filter(p => p.time);
-        
-        // Draw prayer segments
-        for (let i = 0; i < prayers.length; i++) {
-            const prayer = prayers[i];
-            const nextPrayer = prayers[i + 1];
-            
-            const startAngle = this.timeToAngle(prayer.time);
-            const endAngle = nextPrayer ? this.timeToAngle(nextPrayer.time) : this.timeToAngle(prayer.time) + (2 * Math.PI);
-            
-            ctx.beginPath();
-            ctx.arc(this.centerX, this.centerY, this.radius, startAngle, endAngle);
-            ctx.lineWidth = 40;
-            ctx.strokeStyle = this.colors[prayer.name];
-            ctx.stroke();
-            
-            // Draw labels
-            const midAngle = (startAngle + endAngle) / 2;
-            const labelRadius = this.radius - 60;
-            const labelX = this.centerX + Math.cos(midAngle) * labelRadius;
-            const labelY = this.centerY + Math.sin(midAngle) * labelRadius;
-            
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(prayer.name, labelX, labelY);
-            ctx.fillText(prayer.time, labelX, labelY + 15);
-        }
-        
-        // Draw current time needle
-        const currentAngle = this.getCurrentTimeAngle();
-        ctx.beginPath();
-        ctx.moveTo(this.centerX, this.centerY);
-        ctx.lineTo(
-            this.centerX + Math.cos(currentAngle) * (this.radius + 10),
-            this.centerY + Math.sin(currentAngle) * (this.radius + 10)
-        );
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = '#fff';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur = 5;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        
-        // Draw center circle
-        ctx.beginPath();
-        ctx.arc(this.centerX, this.centerY, this.radius * 0.55, 0, 2 * Math.PI);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        
-        ctx.beginPath();
-        ctx.arc(this.centerX, this.centerY, 8, 0, 2 * Math.PI);
-        ctx.fillStyle = '#667eea';
-        ctx.fill();
-        
-        this.updateCountdown();
-        
-        } catch (error) {
-            console.error('Error in draw():', error);
-        }
+        this.start();
     }
     
     getNextPrayer() {
@@ -230,9 +112,7 @@ class PrayerClock {
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
         
         const prayers = [
-            { name: 'Imsak', time: this.prayerTimes.imsak },
             { name: 'Subuh', time: this.prayerTimes.subuh || this.prayerTimes.fajr },
-            { name: 'Syuruk', time: this.prayerTimes.syuruk || this.prayerTimes.sunrise },
             { name: 'Zohor', time: this.prayerTimes.zohor || this.prayerTimes.dhuhr },
             { name: 'Asar', time: this.prayerTimes.asar || this.prayerTimes.asr },
             { name: 'Maghrib', time: this.prayerTimes.maghrib },
@@ -251,9 +131,9 @@ class PrayerClock {
         return prayers[0] ? { ...prayers[0], tomorrow: true } : null;
     }
     
-    updateCountdown() {
+    update() {
         const nextPrayer = this.getNextPrayer();
-        if (!nextPrayer || !this.centerDiv) return;
+        if (!nextPrayer) return;
         
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
@@ -269,24 +149,18 @@ class PrayerClock {
         const minutes = Math.floor(diffMinutes % 60);
         const seconds = Math.floor((diffMinutes * 60) % 60);
         
-        this.centerDiv.innerHTML = `
-            <div class="next-prayer-label">Solat Seterusnya</div>
-            <div class="next-prayer-name">${nextPrayer.name}</div>
-            <div class="countdown-timer">${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</div>
-            <div class="countdown-label">${nextPrayer.time}</div>
-        `;
+        if (this.prayerNameEl) this.prayerNameEl.textContent = nextPrayer.name;
+        if (this.timerEl) this.timerEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        if (this.timeEl) this.timeEl.textContent = `Waktu: ${nextPrayer.time}`;
     }
     
-    startAnimation() {
-        const animate = () => {
-            this.draw();
-            this.animationFrame = requestAnimationFrame(animate);
-        };
-        animate();
+    start() {
+        this.update();
+        this.intervalId = setInterval(() => this.update(), 1000);
     }
     
     stop() {
-        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        if (this.intervalId) clearInterval(this.intervalId);
     }
 }
 
@@ -739,15 +613,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     try {
         // Initialize all features with error handling
-        const canvas = document.getElementById('clock-canvas');
-        const center = document.getElementById('clock-center');
-        
-        if (canvas && center) {
-            prayerClock = new PrayerClock('clock-canvas', 'clock-center');
-            console.log('✅ Prayer clock initialized');
-        } else {
-            console.warn('⚠️ Clock elements not found');
-        }
+        countdownTimer = new CountdownTimer();
+        console.log('✅ Countdown timer initialized');
         
         streakTracker = new StreakTracker();
         notifications = new PrayerNotifications();
@@ -848,9 +715,9 @@ async function loadPrayerTimes(zone) {
         displayPrayerTimes(prayerData, zone);
         
         // Update all features
-        if (prayerClock) {
-            prayerClock.setPrayerTimes(prayerData);
-            console.log('? Clock updated');
+        if (countdownTimer) {
+            countdownTimer.setPrayerTimes(prayerData);
+            console.log('✅ Countdown timer updated');
         }
         if (notifications && notifications.settings.enabled) {
             notifications.schedulePrayerNotifications(prayerData);

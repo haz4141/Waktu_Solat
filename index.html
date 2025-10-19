@@ -11,6 +11,57 @@
     <link rel="stylesheet" href="css/animations.css">
     
     <style>
+        /* Countdown Timer Styles */
+        .countdown-container {
+            background: linear-gradient(135deg, #6B46C1 0%, #553C9A 100%);
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 40px rgba(107, 70, 193, 0.3);
+            text-align: center;
+            color: white;
+        }
+        
+        .countdown-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 3px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .countdown-prayer-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .countdown-timer {
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 5px;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        }
+        
+        .countdown-time {
+            font-size: 1.1rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .countdown-prayer-name {
+                font-size: 2rem;
+            }
+            .countdown-timer {
+                font-size: 2.5rem;
+                letter-spacing: 3px;
+            }
+        }
+        
         /* Streak Tracker Styles */
         .streak-container {
             background: white;
@@ -321,12 +372,12 @@
             </div>
         </div>
 
-        <!-- Circular Prayer Clock (Killer Feature!) -->
-        <div class="card prayer-clock-container">
-            <div class="prayer-clock">
-                <canvas id="clock-canvas"></canvas>
-                <div id="clock-center" class="clock-center"></div>
-            </div>
+        <!-- Next Prayer Countdown -->
+        <div class="card countdown-container">
+            <div class="countdown-header">SOLAT SETERUSNYA</div>
+            <div class="countdown-prayer-name" id="countdown-prayer">Maghrib</div>
+            <div class="countdown-timer" id="countdown-timer">00:00:00</div>
+            <div class="countdown-time" id="countdown-time">Waktu: 18:20</div>
         </div>
 
         <!-- Streak Tracker -->

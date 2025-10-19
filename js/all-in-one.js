@@ -110,14 +110,20 @@ class PrayerClock {
     }
     
     setupCanvas() {
-        const size = Math.min(this.canvas.parentElement.clientWidth - 40, 350);
-        this.canvas.width = size;
-        this.canvas.height = size;
-        this.canvas.style.width = size + 'px';
-        this.canvas.style.height = size + 'px';
-        this.centerX = size / 2;
-        this.centerY = size / 2;
-        this.radius = (size / 2) - 30;
+        if (!this.canvas || !this.canvas.parentElement) return;
+        
+        try {
+            const size = Math.min(this.canvas.parentElement.clientWidth - 40, 350);
+            this.canvas.width = size;
+            this.canvas.height = size;
+            this.canvas.style.width = size + 'px';
+            this.canvas.style.height = size + 'px';
+            this.centerX = size / 2;
+            this.centerY = size / 2;
+            this.radius = (size / 2) - 30;
+        } catch (error) {
+            console.error('Error in setupCanvas:', error);
+        }
     }
     
     setPrayerTimes(data) {
@@ -140,10 +146,11 @@ class PrayerClock {
     }
     
     draw() {
-        if (!this.prayerTimes) return;
+        if (!this.prayerTimes || !this.ctx || !this.canvas) return;
         
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        try {
+            const ctx = this.ctx;
+            ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         const prayers = [
             { name: 'Imsak', time: this.prayerTimes.imsak },
@@ -210,6 +217,10 @@ class PrayerClock {
         ctx.fill();
         
         this.updateCountdown();
+        
+        } catch (error) {
+            console.error('Error in draw():', error);
+        }
     }
     
     getNextPrayer() {
@@ -873,42 +884,73 @@ function formatHijriDate(hijriStr) {
 
 // ===== MAIN APP INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all features
-    prayerClock = new PrayerClock('clock-canvas', 'clock-center');
-    streakTracker = new StreakTracker();
-    notifications = new PrayerNotifications();
-    themeController = new ThemeController();
+    console.log('🚀 App initializing...');
     
-    // Render UIs
-    streakTracker.renderUI();
-    notifications.renderSettingsUI();
-    themeController.renderToggleUI();
-    initQibla();
-    
-    // Load zones and setup event listeners
-    loadZones();
-    document.getElementById('detect-location').addEventListener('click', detectLocation);
-    document.getElementById('zone-select').addEventListener('change', (e) => {
-        if (e.target.value) {
-            currentZone = e.target.value;
-            loadPrayerTimes(e.target.value);
+    try {
+        // Initialize all features with error handling
+        const canvas = document.getElementById('clock-canvas');
+        const center = document.getElementById('clock-center');
+        
+        if (canvas && center) {
+            prayerClock = new PrayerClock('clock-canvas', 'clock-center');
+            console.log('✅ Prayer clock initialized');
+        } else {
+            console.warn('⚠️ Clock elements not found');
         }
-    });
-    
-    // Listen for prayer check-ins
-    document.addEventListener('prayerChecked', () => {
-        if (currentZone && prayerData) {
-            displayPrayerTimes(prayerData, currentZone);
+        
+        streakTracker = new StreakTracker();
+        notifications = new PrayerNotifications();
+        themeController = new ThemeController();
+        console.log('✅ Features initialized');
+        
+        // Render UIs
+        streakTracker.renderUI();
+        notifications.renderSettingsUI();
+        themeController.renderToggleUI();
+        initQibla();
+        console.log('✅ UIs rendered');
+        
+        // Load zones and setup event listeners
+        loadZones();
+        console.log('✅ Zones loaded');
+        
+        const detectBtn = document.getElementById('detect-location');
+        const zoneSelect = document.getElementById('zone-select');
+        
+        if (detectBtn) {
+            detectBtn.addEventListener('click', detectLocation);
         }
-    });
-    
-    // Refresh every minute
-    setInterval(() => {
-        if (currentZone && prayerData) {
-            prayerClock?.draw();
-            themeController.updateTheme(prayerData);
+        
+        if (zoneSelect) {
+            zoneSelect.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    currentZone = e.target.value;
+                    loadPrayerTimes(e.target.value);
+                }
+            });
         }
-    }, 60000);
+        
+        // Listen for prayer check-ins
+        document.addEventListener('prayerChecked', () => {
+            if (currentZone && prayerData) {
+                displayPrayerTimes(prayerData, currentZone);
+            }
+        });
+        
+        // Refresh every minute
+        setInterval(() => {
+            if (currentZone && prayerData) {
+                if (prayerClock) prayerClock.draw();
+                themeController.updateTheme(prayerData);
+            }
+        }, 60000);
+        
+        console.log('✅ App fully initialized!');
+        
+    } catch (error) {
+        console.error('❌ Initialization error:', error);
+        alert('Ralat memulakan aplikasi: ' + error.message);
+    }
 });
 
 function loadZones() {
@@ -938,68 +980,103 @@ function loadZones() {
 }
 
 async function loadPrayerTimes(zone) {
+    console.log('🔄 Loading prayer times for zone:', zone);
+    
     const loading = document.getElementById('loading');
     const content = document.getElementById('content');
     const error = document.getElementById('error');
     
-    loading.style.display = 'block';
-    content.style.display = 'none';
-    error.style.display = 'none';
+    if (loading) loading.style.display = 'block';
+    if (content) content.style.display = 'none';
+    if (error) error.style.display = 'none';
     
     try {
         prayerData = await fetchPrayerTimes(zone);
+        console.log('✅ Prayer data received:', prayerData);
+        
         displayPrayerTimes(prayerData, zone);
         
         // Update all features
-        if (prayerClock) prayerClock.setPrayerTimes(prayerData);
-        if (notifications && notifications.settings.enabled) notifications.schedulePrayerNotifications(prayerData);
-        if (themeController) themeController.updateTheme(prayerData);
+        if (prayerClock) {
+            prayerClock.setPrayerTimes(prayerData);
+            console.log('✅ Clock updated');
+        }
+        if (notifications && notifications.settings.enabled) {
+            notifications.schedulePrayerNotifications(prayerData);
+        }
+        if (themeController) {
+            themeController.updateTheme(prayerData);
+        }
         
     } catch (err) {
-        console.error(err);
-        error.textContent = '❌ Gagal memuat waktu solat. Sila cuba lagi.';
-        error.style.display = 'block';
-        loading.style.display = 'none';
+        console.error('❌ Error loading prayer times:', err);
+        if (error) {
+            error.textContent = '❌ Gagal memuat waktu solat. Sila cuba lagi. (' + err.message + ')';
+            error.style.display = 'block';
+        }
+        if (loading) loading.style.display = 'none';
     }
 }
 
 function displayPrayerTimes(data, zone) {
-    document.getElementById('current-date').textContent = new Date().toLocaleDateString('ms-MY', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-    document.getElementById('hijri-date').textContent = formatHijriDate(data.hijri || data.hijriDate || '');
+    console.log('📅 Displaying prayer times for zone:', zone);
     
-    const zoneInfo = zones.find(z => z.zone === zone);
-    if (zoneInfo) {
-        document.getElementById('location-name').textContent = zoneInfo.lokasi;
-        document.getElementById('location-detail').textContent = `${zoneInfo.negeri} • Zon ${zone}`;
-    }
-    
-    const container = document.getElementById('prayer-times');
-    container.innerHTML = '';
-    
-    prayerOrder.forEach(prayer => {
-        let time = null;
-        for (const key of prayer.keys) {
-            if (data[key]) {
-                time = typeof data[key] === 'object' ? data[key].time : data[key];
-                break;
-            }
+    try {
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            dateEl.textContent = new Date().toLocaleDateString('ms-MY', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
         }
         
-        if (time) {
-            const div = document.createElement('div');
-            div.className = 'prayer-item';
-            div.innerHTML = `
-                <div class="prayer-name">${prayer.display}</div>
-                <div class="prayer-time">${time}</div>
-            `;
-            container.appendChild(div);
+        const hijriEl = document.getElementById('hijri-date');
+        if (hijriEl) {
+            hijriEl.textContent = formatHijriDate(data.hijri || data.hijriDate || '');
         }
-    });
     
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
+        const zoneInfo = zones.find(z => z.zone === zone);
+        if (zoneInfo) {
+            const locNameEl = document.getElementById('location-name');
+            const locDetailEl = document.getElementById('location-detail');
+            if (locNameEl) locNameEl.textContent = zoneInfo.lokasi;
+            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} • Zon ${zone}`;
+        }
+        
+        const container = document.getElementById('prayer-times');
+        if (container) {
+            container.innerHTML = '';
+            
+            prayerOrder.forEach(prayer => {
+                let time = null;
+                for (const key of prayer.keys) {
+                    if (data[key]) {
+                        time = typeof data[key] === 'object' ? data[key].time : data[key];
+                        break;
+                    }
+                }
+                
+                if (time) {
+                    const div = document.createElement('div');
+                    div.className = 'prayer-item';
+                    div.innerHTML = `
+                        <div class="prayer-name">${prayer.display}</div>
+                        <div class="prayer-time">${time}</div>
+                    `;
+                    container.appendChild(div);
+                }
+            });
+        }
+        
+        const loadingEl = document.getElementById('loading');
+        const contentEl = document.getElementById('content');
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (contentEl) contentEl.style.display = 'block';
+        
+        console.log('✅ Prayer times displayed successfully');
+        
+    } catch (error) {
+        console.error('❌ Error in displayPrayerTimes:', error);
+    }
 }
 
 function detectLocation() {

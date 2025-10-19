@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waktu Solat Malaysia - Interaktif</title>
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/clock.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <style>
+        /* Streak Tracker Styles */
+        .streak-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .streak-header h3 {
+            color: #6B46C1;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .streak-progress {
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6B46C1 0%, #553C9A 100%);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 600;
+            color: #6B46C1;
+        }
+        
+        .streak-counter {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-radius: 10px;
+            font-size: 1.3rem;
+            margin: 15px 0;
+        }
+        
+        .streak-message {
+            text-align: center;
+            padding: 10px;
+            color: #6B46C1;
+            font-weight: 600;
+        }
+        
+        .prayer-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .checklist-item.checked {
+            background: #d4edda;
+        }
+        
+        .check-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #6B46C1;
+            background: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .check-btn:hover:not(:disabled) {
+            background: #6B46C1;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .check-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        /* Notification Settings Styles */
+        .notification-settings {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .settings-header h3 {
+            color: #6B46C1;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .enable-notifications-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6B46C1 0%, #553C9A 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .enable-notifications-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 70, 193, 0.4);
+        }
+        
+        .settings-group {
+            margin: 15px 0;
+        }
+        
+        .settings-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .settings-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .settings-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        .disable-notifications-btn {
+            width: 100%;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .notification-denied {
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+            color: #856404;
+            text-align: center;
+        }
+        
+        /* Qibla Widget Styles */
+        .qibla-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .qibla-compact {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .qibla-compact:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        
+        .compass-icon {
+            font-size: 2rem;
+        }
+        
+        .qibla-expanded {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            min-width: 250px;
+            display: none;
+        }
+        
+        .qibla-expanded.show {
+            display: block;
+        }
+        
+        .qibla-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .qibla-header h3 {
+            color: #6B46C1;
+            margin: 0;
+        }
+        
+        .close-qibla {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .qibla-compass {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .qibla-info {
+            text-align: center;
+        }
+        
+        .qibla-direction, .qibla-distance {
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+        
+        .qibla-instruction {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #666;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .qibla-error {
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .qibla-widget {
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .qibla-expanded {
+                right: -100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕌 Waktu Solat Malaysia</h1>
+            <p>Jadual Waktu Solat Interaktif & Terkini</p>
+        </div>
+
+        <!-- Zone Selection Card -->
+        <div class="card">
+            <div class="zone-selector">
+                <label for="zone-select">Pilih Lokasi Anda:</label>
+                <div class="select-wrapper">
+                    <select id="zone-select">
+                        <option value="">Memuat lokasi...</option>
+                    </select>
+                </div>
+                <button id="detect-location" class="detect-btn">
+                    📍 Kesan Lokasi Saya
+                </button>
+                <div id="location-status" class="location-status" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Circular Prayer Clock (Killer Feature!) -->
+        <div class="card prayer-clock-container">
+            <div class="prayer-clock">
+                <canvas id="clock-canvas"></canvas>
+                <div id="clock-center" class="clock-center"></div>
+            </div>
+        </div>
+
+        <!-- Streak Tracker -->
+        <div class="card streak-container" id="streak-container">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="card notification-settings" id="notification-settings">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Loading/Error States -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Memuat waktu solat...</p>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Prayer Times Display -->
+        <div id="content" style="display: none;">
+            <div class="card">
+                <div class="date-info">
+                    <h2 id="current-date"></h2>
+                    <p class="hijri" id="hijri-date"></p>
+                </div>
+
+                <div class="prayer-times" id="prayer-times"></div>
+
+                <div class="location-info">
+                    <h3 id="location-name"></h3>
+                    <p id="location-detail"></p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Data daripada JAKIM melalui <a href="https://api.waktusolat.app" style="color: white; text-decoration: underline;">Waktu Solat API</a></p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">Dicipta dengan ❤️ untuk umat Islam Malaysia</p>
+        </footer>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div id="theme-toggle-container"></div>
+
+    <!-- Qibla Compass Widget -->
+    <div class="qibla-widget" id="qibla-widget">
+        <div class="qibla-compact" id="qibla-compact">
+            <div class="compass-icon">🧭</div>
+        </div>
+    </div>
+
+    <!-- Single JavaScript File -->
+    <script src="js/all-in-one.js"></script>
+</body>
+</html>

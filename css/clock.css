@@ -1,0 +1,126 @@
+/* Circular Prayer Clock Styles */
+
+.prayer-clock-container {
+    margin-bottom: 30px;
+}
+
+.prayer-clock {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.clock-canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.clock-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.next-prayer-label {
+    font-size: 0.9rem;
+    color: #6B46C1;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.next-prayer-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.countdown-timer {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #6B46C1;
+    font-family: 'Courier New', monospace;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.countdown-label {
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 5px;
+}
+
+/* Clock legend */
+.clock-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Prayer time tooltips */
+.prayer-tooltip {
+    position: absolute;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+    white-space: nowrap;
+}
+
+.prayer-tooltip.show {
+    opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .countdown-timer {
+        font-size: 2rem;
+    }
+    
+    .next-prayer-name {
+        font-size: 1.5rem;
+    }
+    
+    .clock-legend {
+        gap: 10px;
+    }
+    
+    .legend-item {
+        font-size: 0.8rem;
+    }
+}
+

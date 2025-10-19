@@ -146,7 +146,14 @@ class CountdownTimer {
             }
         }
         
-        return prayers[0] ? { ...prayers[0], tomorrow: true } : null;
+        // If no prayer found today, return tomorrow's Subuh with minutes calculated
+        if (prayers[0]) {
+            const [hours, minutes] = prayers[0].time.split(':').map(Number);
+            const prayerMinutes = hours * 60 + minutes;
+            return { ...prayers[0], minutes: prayerMinutes, tomorrow: true };
+        }
+        
+        return null;
     }
     
     update() {

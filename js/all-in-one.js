@@ -82,6 +82,24 @@ const hijriMonths = {
     '09': 'Ramadan', '10': 'Syawal', '11': 'Zulkaedah', '12': 'Zulhijjah'
 };
 
+// State flag emojis mapping
+const stateFlagEmojis = {
+    'Johor': '🟦',
+    'Kedah': '🟥',
+    'Kelantan': '🔴',
+    'Melaka': '🔵',
+    'Negeri Sembilan': '🟡',
+    'Pahang': '⚫',
+    'Perlis': '🟨',
+    'Pulau Pinang': '🔵',
+    'Perak': '⚪',
+    'Sabah': '🔷',
+    'Sarawak': '🟡',
+    'Selangor': '🔴',
+    'Terengganu': '⚫',
+    'Wilayah Persekutuan': '🇲🇾'
+};
+
 // ===== GLOBAL STATE =====
 let currentZone = 'WLY01';
 let prayerData = null;
@@ -757,7 +775,8 @@ function displayPrayerTimes(data, zone) {
             const locNameEl = document.getElementById('location-name');
             const locDetailEl = document.getElementById('location-detail');
             if (locNameEl) locNameEl.textContent = zoneInfo.lokasi;
-            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} � Zon ${zone}`;
+            const flagEmoji = stateFlagEmojis[zoneInfo.negeri] || '🏴';
+            if (locDetailEl) locDetailEl.textContent = `${zoneInfo.negeri} ${flagEmoji} Zon ${zone}`;
     }
     
     const container = document.getElementById('prayer-times');

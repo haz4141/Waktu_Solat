@@ -838,28 +838,37 @@ class ARQiblaFinder {
             container.innerHTML = `
                 <video id="qibla-camera" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;"></video>
                 <div id="qibla-compass-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <!-- Top info bar -->
+                    <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); padding: 10px 20px; border-radius: 20px; color: white; font-size: 0.9rem;">
+                        <div id="compass-status">📍 Kalibrasi kompas...</div>
+                    </div>
+                    
                     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="position: absolute;">
                         <!-- Compass circles -->
                         <circle cx="${cx}" cy="${cy}" r="120" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
                         <circle cx="${cx}" cy="${cy}" r="100" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
                         
-                        <!-- Direction markers -->
-                        <text x="${cx}" y="${cy - 140}" text-anchor="middle" fill="white" font-size="24" font-weight="bold">N</text>
-                        <text x="${cx + 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20">E</text>
-                        <text x="${cx}" y="${cy + 160}" text-anchor="middle" fill="white" font-size="20">S</text>
-                        <text x="${cx - 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20">W</text>
+                        <!-- Direction markers (N E S W) -->
+                        <text x="${cx}" y="${cy - 140}" text-anchor="middle" fill="white" font-size="24" font-weight="bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">N</text>
+                        <text x="${cx + 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">E</text>
+                        <text x="${cx}" y="${cy + 160}" text-anchor="middle" fill="white" font-size="20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">S</text>
+                        <text x="${cx - 140}" y="${cy + 8}" text-anchor="middle" fill="white" font-size="20" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">W</text>
                         
                         <!-- Qibla arrow (will be rotated by JavaScript) -->
-                        <g id="qibla-arrow" style="transform-origin: ${cx}px ${cy}px;">
-                            <path d="M ${cx} ${cy - 90} L ${cx - 12} ${cy - 30} L ${cx} ${cy - 35} L ${cx + 12} ${cy - 30} Z" fill="#10b981" stroke="white" stroke-width="3"/>
-                            <circle cx="${cx}" cy="${cy}" r="10" fill="#10b981" stroke="white" stroke-width="3"/>
-                            <text x="${cx}" y="${cy - 100}" text-anchor="middle" fill="white" font-size="24" font-weight="bold">🕋</text>
+                        <g id="qibla-arrow" style="transform-origin: ${cx}px ${cy}px; transition: transform 0.1s ease-out;">
+                            <!-- Arrow pointer -->
+                            <path d="M ${cx} ${cy - 90} L ${cx - 15} ${cy - 30} L ${cx} ${cy - 40} L ${cx + 15} ${cy - 30} Z" fill="#10b981" stroke="white" stroke-width="3" style="filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));"/>
+                            <!-- Center dot -->
+                            <circle cx="${cx}" cy="${cy}" r="12" fill="#10b981" stroke="white" stroke-width="3" style="filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6));"/>
+                            <!-- Kaaba icon -->
+                            <text x="${cx}" y="${cy - 100}" text-anchor="middle" fill="white" font-size="28" font-weight="bold" style="text-shadow: 2px 2px 6px rgba(0,0,0,0.9);">🕋</text>
                         </g>
                     </svg>
                     
                     <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(107, 70, 193, 0.95); padding: 20px 30px; border-radius: 15px; color: white; text-align: center; max-width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
                         <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">Pusingkan Telefon ke Arah Kiblat</div>
                         <div style="font-size: 1rem;">Bila anak panah hijau 🕋 menghala ke atas = Arah Kiblat ✓</div>
+                        <div id="qibla-angle-display" style="font-size: 0.85rem; margin-top: 10px; opacity: 0.8;">Arah Kiblat: ${Math.round(qiblaData.direction)}°</div>
                     </div>
                 </div>
             `;
@@ -916,23 +925,100 @@ class ARQiblaFinder {
         `;
     }
     
-    startCompassTracking(container) {
-        if ('DeviceOrientationEvent' in window) {
-            window.addEventListener('deviceorientation', (event) => {
-                if (!this.isActive) return;
-                
-                let heading = event.alpha; // Compass heading
-                if (heading !== null) {
-                    // Calculate rotation for arrow
-                    const arrowRotation = this.qiblaDirection - heading;
-                    const arrow = document.getElementById('qibla-arrow');
-                    if (arrow) {
-                        arrow.style.transform = `rotate(${arrowRotation}deg)`;
-                        arrow.style.transformOrigin = 'center';
-                    }
+    async startCompassTracking(container) {
+        console.log('🧭 Starting compass tracking...');
+        
+        // Request permission for iOS 13+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceOrientationEvent.requestPermission();
+                if (permission !== 'granted') {
+                    console.warn('⚠️ Device orientation permission denied');
+                    return;
                 }
-            });
+                console.log('✅ Device orientation permission granted');
+            } catch (error) {
+                console.error('❌ Error requesting device orientation permission:', error);
+                return;
+            }
         }
+        
+        // Use absolute device orientation for true compass heading
+        const eventType = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+        console.log('📱 Using event:', eventType);
+        
+        let compassHeading = 0;
+        let calibrationCount = 0;
+        
+        const handleOrientation = (event) => {
+            if (!this.isActive) return;
+            
+            // Get compass heading from device orientation
+            // alpha: rotation around z-axis (0-360)
+            // beta: front-to-back tilt (-180 to 180)
+            // gamma: left-to-right tilt (-90 to 90)
+            
+            let alpha = event.alpha; // Compass direction
+            const beta = event.beta;   // Front-back tilt
+            const gamma = event.gamma; // Left-right tilt
+            
+            if (alpha === null) return;
+            
+            // For iOS, need to adjust for screen orientation
+            if (event.webkitCompassHeading !== undefined) {
+                // iOS provides true compass heading directly
+                compassHeading = event.webkitCompassHeading;
+            } else {
+                // Android: use alpha value
+                // Adjust for screen orientation
+                const screenOrientation = window.orientation || 0;
+                compassHeading = alpha - screenOrientation;
+                
+                // Normalize to 0-360
+                if (compassHeading < 0) compassHeading += 360;
+                if (compassHeading >= 360) compassHeading -= 360;
+            }
+            
+            // Calculate how much to rotate the arrow
+            // When phone points North (compassHeading = 0), arrow should point to qiblaDirection
+            // When phone rotates, arrow rotates opposite direction to stay pointing at Qibla
+            const arrowRotation = this.qiblaDirection - compassHeading;
+            
+            const arrow = document.getElementById('qibla-arrow');
+            if (arrow) {
+                arrow.style.transform = `rotate(${arrowRotation}deg)`;
+            }
+            
+            // Update status indicator
+            calibrationCount++;
+            if (calibrationCount === 3) {
+                const statusEl = document.getElementById('compass-status');
+                if (statusEl) {
+                    statusEl.textContent = `🧭 Kompas aktif | ${Math.round(compassHeading)}°`;
+                }
+            }
+            
+            // Update angle display
+            const angleDisplay = document.getElementById('qibla-angle-display');
+            if (angleDisplay && calibrationCount > 3) {
+                const difference = Math.abs(compassHeading - this.qiblaDirection);
+                const isAligned = difference < 10 || difference > 350;
+                if (isAligned) {
+                    angleDisplay.innerHTML = `✅ <strong>ARAH KIBLAT!</strong> Sempurna!`;
+                    angleDisplay.style.color = '#10b981';
+                } else {
+                    angleDisplay.innerHTML = `Arah Kiblat: ${Math.round(this.qiblaDirection)}° | Anda: ${Math.round(compassHeading)}°`;
+                    angleDisplay.style.color = 'white';
+                }
+            }
+        };
+        
+        window.addEventListener(eventType, handleOrientation, true);
+        console.log('✅ Compass tracking started');
+        
+        // Store the event listener so we can remove it later
+        this.orientationHandler = handleOrientation;
+        this.orientationEventType = eventType;
     }
     
     close() {
@@ -944,11 +1030,20 @@ class ARQiblaFinder {
             this.videoStream = null;
         }
         
+        // Remove orientation event listener
+        if (this.orientationHandler && this.orientationEventType) {
+            window.removeEventListener(this.orientationEventType, this.orientationHandler, true);
+            this.orientationHandler = null;
+            this.orientationEventType = null;
+        }
+        
         // Remove overlay
         const overlay = document.getElementById('qibla-ar-overlay');
         if (overlay) {
             overlay.remove();
         }
+        
+        console.log('🔴 Qibla finder closed');
     }
 }
 

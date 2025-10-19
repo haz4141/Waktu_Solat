@@ -459,6 +459,8 @@ class PrayerNotifications {
     }
     
     showNotification(title, body, playSound = true) {
+        if (!('Notification' in window)) return;
+        
         if (Notification.permission === 'granted') {
             const notification = new Notification(title, { body, icon: '🕌', badge: '🕌' });
             notification.onclick = () => { window.focus(); notification.close(); };
@@ -469,7 +471,7 @@ class PrayerNotifications {
     schedulePrayerNotifications(prayerTimes) {
         this.clearScheduledNotifications();
         
-        if (!this.settings.enabled || Notification.permission !== 'granted') return;
+        if (!('Notification' in window) || !this.settings.enabled || Notification.permission !== 'granted') return;
         
         const prayers = [
             { name: 'Subuh', time: prayerTimes.subuh || prayerTimes.fajr },
@@ -513,6 +515,15 @@ class PrayerNotifications {
     renderSettingsUI() {
         const container = document.getElementById('notification-settings');
         if (!container) return;
+        
+        // Check if Notification API is available
+        if (!('Notification' in window)) {
+            container.innerHTML = `
+                <div class="settings-header"><h3>🔔 Tetapan Notifikasi</h3></div>
+                <div class="notification-denied">⚠️ Pelayar anda tidak menyokong notifikasi</div>
+            `;
+            return;
+        }
         
         const isEnabled = this.settings.enabled && Notification.permission === 'granted';
         const canRequest = Notification.permission !== 'denied';

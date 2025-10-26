@@ -668,6 +668,8 @@ document.addEventListener('DOMContentLoaded', function() {
             zoneSelect.addEventListener('change', (e) => {
         if (e.target.value) {
             currentZone = e.target.value;
+            // Save selected zone to localStorage
+            localStorage.setItem('selectedZone', e.target.value);
             loadPrayerTimes(e.target.value);
         }
     });
@@ -718,8 +720,18 @@ function loadZones() {
         select.appendChild(optgroup);
     });
     
-    select.value = 'WLY01';
-    loadPrayerTimes('WLY01');
+    // Load saved zone from localStorage
+    const savedZone = localStorage.getItem('selectedZone');
+    if (savedZone) {
+        select.value = savedZone;
+        currentZone = savedZone;
+        loadPrayerTimes(savedZone);
+    } else {
+        // Default to Kuala Lumpur if no saved zone
+        select.value = 'WLY01';
+        currentZone = 'WLY01';
+        loadPrayerTimes('WLY01');
+    }
 }
 
 async function loadPrayerTimes(zone) {
@@ -864,6 +876,8 @@ function detectLocation() {
             if (zoneSelect) {
                 zoneSelect.value = nearest.zone;
             currentZone = nearest.zone;
+            // Save detected zone to localStorage
+            localStorage.setItem('selectedZone', nearest.zone);
             loadPrayerTimes(nearest.zone);
             }
             
